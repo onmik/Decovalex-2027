@@ -1,0 +1,285 @@
+#=========================== simulation card ===================================
+SIMULATION
+  SIMULATION_TYPE SUBSURFACE
+  PROCESS_MODELS
+    SUBSURFACE_FLOW flow
+      MODE RICHARDS 
+    /
+    SUBSURFACE_TRANSPORT transport
+      MODE GIRT
+    /
+  /
+END
+SUBSURFACE
+
+#=========================== discretization ===================================
+GRID
+  TYPE structured
+  ORIGIN 0.d0 0.d0 0.d0
+  NXYZ 58 38 1
+  DXYZ
+    10@0.01 10@0.02 14@0.05 10@0.1 10@0.2 4@1
+    10@0.005 5@0.01 18@0.05 5@0.2
+    1.d0
+  /
+END
+
+#=========================== regions ==========================================
+REGION all
+  COORDINATES
+    0.d0 0.d0 0.d0
+    8.d0 2.0d0 1.d0
+  /
+END
+
+REGION left
+  FACE WEST
+  COORDINATES
+    0.d0 0.d0 0.d0
+    0.d0 0.005 1.d0
+  /
+END
+
+REGION right
+  FACE EAST
+  COORDINATES
+    8.d0 0.d0 0.d0
+    8.d0 0.005 1.d0
+  /
+END
+
+REGION fracture
+  #FACE EAST
+  COORDINATES
+    0.d0 0.d0 0.d0
+    8.d0 0.005 1.d0
+  /
+END
+
+REGION obs_1
+  COORDINATE 1.d0 0.00625d0 1.d0
+END
+
+REGION obs_2
+  COORDINATE 2.d0 0.00625d0 1.d0
+END
+
+REGION obs_4
+  COORDINATE 1.5d0 0.00625d0 1.d0
+END
+
+#=========================== material properties ==============================
+MATERIAL_PROPERTY matrix
+  ID 1
+  POROSITY 0.01d0
+  TORTUOSITY TORTUOSITY_VAR
+  ROCK_DENSITY 2000.d0
+  SATURATION_FUNCTION default 
+  PERMEABILITY
+    PERM_X 1.d-22
+    PERM_Y 1.d-22
+    PERM_Z 1.d-22
+  /   
+END
+
+
+
+MATERIAL_PROPERTY fracture
+  ID 2
+  POROSITY 0.01d0
+  TORTUOSITY 1.d0
+  ROCK_DENSITY 2000.d0
+  LONGITUDINAL_DISPERSIVITY 0.5 
+  SATURATION_FUNCTION default 
+  PERMEABILITY
+    PERM_X PERM_VAR
+    PERM_Y 1e-15
+    PERM_Z 1e-15
+  /
+END
+#=========================== specific discharge ===============================
+#SPECIFIED_VELOCITY 
+#  UNIFORM? YES
+#  DATASET 1.2d-10 0.d0 0.d0 m/s
+#END
+
+#=========================== characteristic curves ============================
+CHARACTERISTIC_CURVES default
+  SATURATION_FUNCTION VAN_GENUCHTEN
+    M 0.286d0
+    ALPHA  1.9401d-4
+    LIQUID_RESIDUAL_SATURATION 0.115
+  /
+  PERMEABILITY_FUNCTION MUALEM_VG_LIQ
+    M 0.286d0
+    LIQUID_RESIDUAL_SATURATION 0.115
+  /
+END 
+
+
+#===========================chemistry======================================
+CHEMISTRY
+  PRIMARY_SPECIES
+    Tracer_conservative
+    Tracer_decay
+    Tracer_sorbing
+  /
+  RADIOACTIVE_DECAY_REACTION
+  REACTION Tracer_decay <->
+  RATE_CONSTANT 1.8d-9 
+  /
+  SORPTION
+    ISOTHERM_REACTIONS
+      Tracer_sorbing
+       DISTRIBUTION_COEFFICIENT KD_VAR 
+      /
+    /
+ /
+  DATABASE tracer.dat
+  LOG_FORMULATION
+  OUTPUT
+    TOTAL
+    ALL
+  /
+END
+#=========================== solver options===================================
+
+#===========================times=========================================
+TIME
+  FINAL_TIME 500. d
+  INITIAL_TIMESTEP_SIZE 1. s
+  MAXIMUM_TIMESTEP_SIZE 100. d
+END
+#=========================== output options==================================
+OUTPUT
+  
+  PERIODIC_OBSERVATION TIMESTEP 1
+  TIMES s  2000. 10000. 8640000.  86400000. 864000000.
+  FORMAT TECPLOT POINT
+  FORMAT HDF5
+  VELOCITY_AT_CENTER
+  
+END
+
+#=========================== observation points=================================
+OBSERVATION
+  REGION obs_1
+END
+
+OBSERVATION
+  REGION obs_2
+END
+
+OBSERVATION
+  REGION obs_4
+END
+
+#=========================== fluid properties =================================
+FLUID_PROPERTY
+  DIFFUSION_COEFFICIENT 1.6d-9 
+END
+
+#=========================== saturation functions =============================
+#CHARACTERISTIC_CURVES cc1
+ # SATURATION_FUNCTION VAN_GENUCHTEN
+  #  LIQUID_RESIDUAL_SATURATION 0.2d0
+   # ALPHA 1.d-4
+#    #M 0.5d0
+ #   MAX_CAPILLARY_PRESSURE 1.d6
+#  /
+ # PERMEABILITY_FUNCTION MUALEM
+  #  PHASE LIQUID
+   # LIQUID_RESIDUAL_SATURATION 0.2d0
+    #M 0.5d0
+#  /
+ # PERMEABILITY_FUNCTION MUALEM_VG_GAS
+  #  PHASE GAS
+   # LIQUID_RESIDUAL_SATURATION 0.2d0
+    #GAS_RESIDUAL_SATURATION 0.1d0
+#    M 0.5d0
+#  /
+#/
+
+
+#=========================== transport conditions =============================
+TRANSPORT_CONDITION initial
+  TYPE DIRICHLET_ZERO_GRADIENT
+  CONSTRAINT_LIST
+    0.d0 initial
+  /
+END
+
+TRANSPORT_CONDITION left
+  TYPE DIRICHLET
+  CONSTRAINT_LIST
+    0.d0 inlet
+   
+  /
+END
+#=========================== flow conditions ==================================
+FLOW_CONDITION leftF
+  TYPE
+    LIQUID_PRESSURE hydrostatic
+  END
+  INTERPOLATION linear
+  DATUM 0.d0 0.d0 1.d0
+  LIQUID_PRESSURE 108238
+END
+
+FLOW_CONDITION initialF
+  TYPE
+    LIQUID_PRESSURE hydrostatic
+  END
+  INTERPOLATION linear
+  DATUM 0.d0 0.d0 1.d0
+  LIQUID_PRESSURE 1d5
+END 
+
+#=========================== constraints =====================================
+CONSTRAINT inlet
+  CONCENTRATIONS
+   Tracer_conservative 1.d0 T
+    Tracer_decay 1.d0 T
+   Tracer_sorbing 1.d0 T
+  /
+END
+
+CONSTRAINT initial
+  CONCENTRATIONS
+    Tracer_conservative 1.d-20 T
+    Tracer_decay 1.d-20 T
+    Tracer_sorbing 1.d-20 T
+/
+END
+
+#=========================== condition couplers ===============================
+INITIAL_CONDITION initial
+  REGION all
+  TRANSPORT_CONDITION initial
+  FLOW_CONDITION initialF 
+END
+
+BOUNDARY_CONDITION west
+  REGION left
+  TRANSPORT_CONDITION left
+  FLOW_CONDITION leftF 
+END
+
+BOUNDARY_CONDITION east
+  REGION right
+  TRANSPORT_CONDITION initial
+  FLOW_CONDITION initialF 
+END
+
+#=========================== stratigraphy couplers ============================
+STRATA
+  REGION all
+  MATERIAL matrix
+END
+
+STRATA
+  REGION fracture
+  MATERIAL fracture
+END
+
+END_SUBSURFACE
