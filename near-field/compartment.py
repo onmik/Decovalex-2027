@@ -73,8 +73,8 @@ nuclide_A_canister = Nuclide("canister_A", 1.0, 5e-4,[(2, transfer_c)], (1, 1))
 nuclide_B_canister = Nuclide("canister_B", 0., 0.,[(3, transfer_c)], () )
 nuclide_A_buffer = Nuclide("buffer_A", 0.0, 5e-4, [(4, transfer_bf)], (3, 1), 1) # buffer A -> fracture A, buffer A -> buffer B
 nuclide_B_buffer = Nuclide("buffer_B", 0.0, 0., [(5, transfer_bf)], (), 1) #buffer B decay.
-nuclide_A_fracture = Nuclide("fracture_A", 0.0, 0.0, [], ()) #fracture A decay. 
-nuclide_B_fracture = Nuclide("fracture_B", 0.0, 0.0) #fracture B decay.
+nuclide_A_fracture = Nuclide("fracture_A", 0.0, 0.0, [], ()) #fracture A. 
+nuclide_B_fracture = Nuclide("fracture_B", 0.0, 0.0) #fracture B.
 
 nuclides = [nuclide_A_canister, nuclide_B_canister, nuclide_A_buffer, nuclide_B_buffer, nuclide_A_fracture, nuclide_B_fracture]
 
