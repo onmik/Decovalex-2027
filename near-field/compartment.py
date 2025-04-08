@@ -45,7 +45,7 @@ class Nuclide:
         self.initial_amount = initial_amount
         self.decay_constant = decay_constant
         self.transfer_to = transfer_to or []  # List of (target_index, transfer_rate) tuples
-        self.decay_to = decay_to   # (target_index, branching_ratio) or None if stable
+        self.decay_to = decay_to   # (target_index, branching_ratio) 
         self.retardation = retardation
 
 def nearfield_ode(t, y, nuclides):
