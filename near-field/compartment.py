@@ -49,7 +49,7 @@ class Nuclide:
         self.retardation = retardation
 
 def nearfield_ode(t, y, nuclides):
-    #ODE system for biosphere compartment model with decay chain.
+    # Decay
     dydt = [0.0] * len(nuclides)
 
     for i, nuclide in enumerate(nuclides):
